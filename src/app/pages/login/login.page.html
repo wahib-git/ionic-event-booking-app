@@ -1,0 +1,50 @@
+
+<ion-content class="login-page">
+  <div class="background-overlay"></div>
+
+  <div class="login-card animate__animated animate__fadeInDown">
+    <!-- Logo + Titre -->
+    <div class="logo-container">
+      <ion-icon name="calendar-outline" class="app-logo"></ion-icon>
+      <h1 class="title"></h1>
+      <p class="subtitle">Connectez-vous à votre espace</p>
+    </div>
+
+    <!-- Formulaire -->
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="login-form animate__animated animate__fadeInUp">
+
+      <ion-item class="input-item">
+        <ion-icon slot="start" name="mail-outline"></ion-icon>
+        <ion-input
+          type="email"
+          placeholder="Adresse e-mail"
+          formControlName="email"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item class="input-item">
+        <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
+        <ion-input
+          type="password"
+          placeholder="Mot de passe"
+          formControlName="password"
+        ></ion-input>
+      </ion-item>
+
+      <ion-button expand="block" type="submit" class="login-btn" [disabled]="!loginForm.valid">
+        <ion-icon name="log-in-outline" slot="start"></ion-icon>
+        Se connecter
+      </ion-button>
+
+      <div class="links">
+        <a href="#">Mot de passe oublié ?</a>
+        <div class="signup-link">
+  <p>
+    Pas encore de compte ?
+    <a routerLink="/register">Inscrivez-vous</a>
+  </p>
+</div>
+      </div>
+    </form>
+  </div>
+</ion-content>

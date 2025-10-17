@@ -1,0 +1,118 @@
+// Animation et effet glassmorphism ultra moderne
+
+.login-page {
+  --background: linear-gradient(135deg, #4f46e5, #6d28d9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  .background-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d')
+      center/cover no-repeat;
+    filter: blur(12px) brightness(0.5);
+    z-index: -1;
+  }
+}
+
+.login-card {
+  width: 90%;
+  max-width: 400px;
+  padding: 2.5rem 2rem;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  border-radius: 25px;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+  color: white;
+  text-align: center;
+}
+
+.logo-container {
+  margin-bottom: 2rem;
+
+  .app-logo {
+    font-size: 70px;
+    color: #ffd93d;
+    animation: pulse 2s infinite;
+  }
+
+  .title {
+    font-weight: 800;
+    font-size: 2rem;
+    margin-top: 0.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+    opacity: 0.85;
+  }
+}
+
+.input-item {
+  --background: rgba(255, 255, 255, 0.95);
+  --color: #000;
+  border-radius: 14px;
+  margin-bottom: 1rem;
+
+  ion-icon {
+    color: #6d28d9;
+  }
+
+  ion-input {
+    color: #111;
+  }
+}
+
+.login-btn {
+  --background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 20px;
+  font-weight: 600;
+  margin-top: 1rem;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.4);
+
+  ion-icon {
+    margin-right: 5px;
+  }
+
+  &:hover {
+    --background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    transform: scale(1.02);
+  }
+}
+
+.links {
+  margin-top: 1.2rem;
+  font-size: 0.9rem;
+
+  a {
+    color: #ffd93d;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  p {
+    margin-top: 0.5rem;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+}

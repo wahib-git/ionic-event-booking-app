@@ -1,0 +1,58 @@
+<ion-content class="ion-padding register-page">
+
+  <div class="register-container">
+    <ion-card class="register-card">
+      <ion-card-header>
+        <ion-card-title class="title">Créer un compte</ion-card-title>
+        <p class="subtitle">Rejoignez notre communauté d’événements </p>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+
+          <ion-item>
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-input
+              formControlName="name"
+              type="text"
+              placeholder="Nom complet"
+              required>
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            <ion-input
+              formControlName="email"
+              type="email"
+              placeholder="Adresse e-mail"
+              required>
+            </ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-input
+              formControlName="password"
+              type="password"
+              placeholder="Mot de passe"
+              required>
+            </ion-input>
+          </ion-item>
+
+          <ion-button expand="block" type="submit" class="ion-margin-top">
+            S’inscrire
+          </ion-button>
+        </form>
+
+        <div class="login-link">
+          <p>
+            Vous avez déjà un compte ?
+            <a routerLink="/login">Connectez-vous</a>
+          </p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+</ion-content>
