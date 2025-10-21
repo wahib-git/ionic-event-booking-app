@@ -15,6 +15,7 @@ import { AuthService } from 'src/app/services/auth';
 })
 export class RegisterPage {
   registerForm = this.fb.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
