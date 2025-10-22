@@ -1,13 +1,45 @@
-<ion-header [translucent]="true">
+<ion-header>
   <ion-toolbar>
-    <ion-title>create-event</ion-title>
+    <ion-title>Créer un Événement</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">create-event</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <form [formGroup]="eventForm" (ngSubmit)="submitEvent()">
+
+    <ion-item>
+      <ion-label position="floating">Nom</ion-label>
+      <ion-input formControlName="nom"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Description</ion-label>
+      <ion-textarea formControlName="description"></ion-textarea>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Date de début</ion-label>
+      <ion-datetime formControlName="dateDebut"></ion-datetime>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Lieu</ion-label>
+      <ion-input formControlName="lieu"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Nombre max participants</ion-label>
+      <ion-input formControlName="nombreMaxParticipants" type="number"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Image URL (optionnel)</ion-label>
+      <ion-input formControlName="imageUrl"></ion-input>
+    </ion-item>
+
+    <ion-button expand="full" type="submit" [disabled]="!eventForm.valid">
+      Créer l'Événement
+    </ion-button>
+
+  </form>
 </ion-content>

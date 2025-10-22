@@ -1,13 +1,101 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>admin-home</ion-title>
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Tableau de bord Admin</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="refreshDashboard()" fill="clear">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">admin-home</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <!-- En-tête utilisateur -->
+  <ion-card class="welcome-card">
+    <ion-card-content>
+      <div class="welcome-header">
+        <ion-icon name="person-circle-outline" class="avatar-icon"></ion-icon>
+        <div class="welcome-text">
+          <h1>Bienvenue, {{ userName }}!</h1>
+          <p>Gérez vos événements et vos participants</p>
+        </div>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Statistiques -->
+  <div class="stats-container">
+    <!-- Total événements -->
+    <ion-card class="stat-card">
+      <ion-card-content>
+        <div class="stat-content">
+          <ion-icon name="calendar-outline" class="stat-icon primary"></ion-icon>
+          <div class="stat-info">
+            <p class="stat-label">Total Événements</p>
+            <p class="stat-value">{{ stats.totalEvents }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Événements actifs -->
+    <ion-card class="stat-card">
+      <ion-card-content>
+        <div class="stat-content">
+          <ion-icon name="checkmark-circle-outline" class="stat-icon success"></ion-icon>
+          <div class="stat-info">
+            <p class="stat-label">Actifs</p>
+            <p class="stat-value">{{ stats.activeEvents }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Participants -->
+    <ion-card class="stat-card">
+      <ion-card-content>
+        <div class="stat-content">
+          <ion-icon name="people-outline" class="stat-icon info"></ion-icon>
+          <div class="stat-info">
+            <p class="stat-label">Participants</p>
+            <p class="stat-value">{{ stats.totalParticipants }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- À venir -->
+    <ion-card class="stat-card">
+      <ion-card-content>
+        <div class="stat-content">
+          <ion-icon name="arrow-forward-outline" class="stat-icon warning"></ion-icon>
+          <div class="stat-info">
+            <p class="stat-label">À venir</p>
+            <p class="stat-value">{{ stats.upcomingEvents }}</p>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Boutons d'action -->
+  <div class="action-buttons">
+    <ion-button expand="block" color="success" (click)="goToCreateEvent()" class="ion-margin-bottom">
+      <ion-icon name="add-outline" slot="start"></ion-icon>
+      Créer un événement
+    </ion-button>
+
+    <ion-button expand="block" color="primary" (click)="goToManageEvents()" class="ion-margin-bottom">
+      <ion-icon name="list-outline" slot="start"></ion-icon>
+      Gérer les événements
+    </ion-button>
+
+    <ion-button expand="block" fill="outline" color="danger" (click)="logout()">
+      <ion-icon name="log-out-outline" slot="start"></ion-icon>
+      Déconnexion
+    </ion-button>
+  </div>
+
+  <!-- Chargement -->
+  <ion-spinner *ngIf="isLoading" name="crescent" color="primary" class="spinner"></ion-spinner>
 </ion-content>

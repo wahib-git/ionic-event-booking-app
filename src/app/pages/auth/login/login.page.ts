@@ -26,13 +26,23 @@ export class LoginPage implements OnInit {
   constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {}
 
   async onLogin() {
-    const { email, password } = this.loginForm.value;
-    try {
-      await this.auth.login(email!, password!);
-      alert(' Connexion réussie !');
-      this.router.navigate(['/home']); 
-    } catch (error: any) {
-      alert(' Erreur : ' + error.message);
+  const { email, password } = this.loginForm.value;
+  try {
+    const userCredential = await this.auth.login(email!, password!);
+    const uid = userCredential.user.uid;
+    const role = await this.auth.getUserRole(uid);
+
+    if (role === 'admin') {
+      alert('Bienvenue Admin !');
+      this.router.navigate(['/admin-dashboard']);
+    } else if (role === 'participant') {
+      alert('Bienvenue Participant !');
+      this.router.navigate(['/participant-dashboard']);
+    } else {
+      alert('Rôle inconnu, contactez l’administrateur.');
     }
+  } catch (error: any) {
+    alert('Erreur : ' + error.message);
   }
+}
 }

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { AdminGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -20,8 +21,12 @@ export const routes: Routes = [
   },
   {
     path: 'admin-home',
-    loadComponent: () => import('./pages/admin/admin-home/admin-home.page').then( m => m.AdminHomePage)
+    loadComponent: () => import('./pages/admin/admin-home/admin-home.page').then( m => m.AdminHomePage),
+    canActivate: [AdminGuard]
   },
+  
+ 
+
   {
     path: 'participant-home',
     loadComponent: () => import('./pages/participant-home/participant-home.page').then( m => m.ParticipantHomePage)
