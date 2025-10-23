@@ -8,10 +8,6 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'home',
-    loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
-  },
-  {
     path: 'login',
     loadComponent: () => import('./pages/auth/login/login.page').then((m) => m.LoginPage),
   },
@@ -39,11 +35,6 @@ export const routes: Routes = [
     path: 'event-details',
     loadComponent: () => import('./pages/event-details/event-details.page').then( m => m.EventDetailsPage)
   },
-  {
-    path: 'event-details',
-    loadComponent: () => import('./pages/event-details/event-details.page').then( m => m.EventDetailsPage)
-  },
-
 
 
 ];

@@ -40,7 +40,7 @@ export class AdminGuard implements CanActivate {
           } else {
             console.warn(' Pas admin, rôle:', role);
             this.showToast('Accès refusé. Rôle: ' + role);
-            this.router.navigate(['/participant-dashboard']);
+            this.router.navigate(['/participant-home']);
             resolve(false);
           }
         } catch (error: any) {
@@ -99,7 +99,7 @@ export class ParticipantGuard implements CanActivate {
           } else {
             console.warn(' Pas participant, rôle:', role);
             this.showToast('Accès refusé');
-            this.router.navigate(['/admin-dashboard']);
+            this.router.navigate(['/admin-home']);
             resolve(false);
           }
         } catch (error: any) {

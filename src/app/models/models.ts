@@ -7,7 +7,7 @@ export interface User {
   uid: string;
   email: string;
   role: 'admin' | 'participant';
-  displayName?: string;
+  Name?: string;
   createdAt: any; // Firebase Timestamp
 }
 

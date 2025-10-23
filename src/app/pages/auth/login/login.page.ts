@@ -34,10 +34,10 @@ export class LoginPage implements OnInit {
 
     if (role === 'admin') {
       alert('Bienvenue Admin !');
-      this.router.navigate(['/admin-dashboard']);
+      this.router.navigate(['/admin-home']);
     } else if (role === 'participant') {
       alert('Bienvenue Participant !');
-      this.router.navigate(['/participant-dashboard']);
+      this.router.navigate(['/participant-home']);
     } else {
       alert('Rôle inconnu, contactez l’administrateur.');
     }
