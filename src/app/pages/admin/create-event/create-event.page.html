@@ -1,45 +1,160 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Créer un Événement</ion-title>
+<!--
+  Template de la page de création d'événement
+  Formulaire réactif avec validation pour créer un nouvel événement
+-->
+
+<!-- Header avec bouton retour -->
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <!-- Bouton retour vers admin-home -->
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/admin-home"></ion-back-button>
+    </ion-buttons>
+    
+    <ion-title>Créer un événement</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <form [formGroup]="eventForm" (ngSubmit)="submitEvent()">
+<!-- Contenu principal avec formulaire -->
+<ion-content [fullscreen]="true">
+  <div class="form-container">
+    <!-- Formulaire réactif Angular -->
+    <form [formGroup]="eventForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Champ: Nom de l'événement -->
+      <ion-item [class.ion-invalid]="isFieldInvalid('nom')">
+        <ion-label position="floating">
+          Nom de l'événement <span class="required">*</span>
+        </ion-label>
+        <ion-input 
+          formControlName="nom"
+          type="text"
+          placeholder="Ex: Festival de musique"
+        ></ion-input>
+      </ion-item>
+      <!-- Message d'erreur pour le nom -->
+      <div class="error-message" *ngIf="isFieldInvalid('nom')">
+        {{ getErrorMessage('nom') }}
+      </div>
 
-    <ion-item>
-      <ion-label position="floating">Nom</ion-label>
-      <ion-input formControlName="nom"></ion-input>
-    </ion-item>
+      <!-- Champ: Description -->
+      <ion-item [class.ion-invalid]="isFieldInvalid('description')">
+        <ion-label position="floating">
+          Description <span class="required">*</span>
+        </ion-label>
+        <ion-textarea
+          formControlName="description"
+          rows="4"
+          placeholder="Décrivez votre événement en détail..."
+        ></ion-textarea>
+      </ion-item>
+      <!-- Message d'erreur pour la description -->
+      <div class="error-message" *ngIf="isFieldInvalid('description')">
+        {{ getErrorMessage('description') }}
+      </div>
 
-    <ion-item>
-      <ion-label position="floating">Description</ion-label>
-      <ion-textarea formControlName="description"></ion-textarea>
-    </ion-item>
+      <!-- Champ: Date de début -->
+      <ion-item [class.ion-invalid]="isFieldInvalid('dateDebut')">
+        <ion-label position="floating">
+          Date et heure de début <span class="required">*</span>
+        </ion-label>
+        <!-- Bouton pour ouvrir le modal de sélection de date -->
+        <ion-datetime-button datetime="datetime"></ion-datetime-button>
+      </ion-item>
+      <!-- Message d'erreur pour la date -->
+      <div class="error-message" *ngIf="isFieldInvalid('dateDebut')">
+        {{ getErrorMessage('dateDebut') }}
+      </div>
 
-    <ion-item>
-      <ion-label position="floating">Date de début</ion-label>
-      <ion-datetime formControlName="dateDebut"></ion-datetime>
-    </ion-item>
+      <!-- Modal contenant le sélecteur de date/heure -->
+      <ion-modal [keepContentsMounted]="true">
+        <ng-template>
+          <ion-datetime
+            id="datetime"
+            formControlName="dateDebut"
+            [min]="minDate"
+            presentation="date-time"
+            locale="fr-FR"
+            [showDefaultButtons]="true"
+            doneText="Valider"
+            cancelText="Annuler"
+          ></ion-datetime>
+        </ng-template>
+      </ion-modal>
 
-    <ion-item>
-      <ion-label position="floating">Lieu</ion-label>
-      <ion-input formControlName="lieu"></ion-input>
-    </ion-item>
+      <!-- Champ: Lieu -->
+      <ion-item [class.ion-invalid]="isFieldInvalid('lieu')">
+        <ion-label position="floating">
+          Lieu <span class="required">*</span>
+        </ion-label>
+        <ion-input
+          formControlName="lieu"
+          type="text"
+          placeholder="Ex: Place de la République, Paris"
+        ></ion-input>
+      </ion-item>
+      <!-- Message d'erreur pour le lieu -->
+      <div class="error-message" *ngIf="isFieldInvalid('lieu')">
+        {{ getErrorMessage('lieu') }}
+      </div>
 
-    <ion-item>
-      <ion-label position="floating">Nombre max participants</ion-label>
-      <ion-input formControlName="nombreMaxParticipants" type="number"></ion-input>
-    </ion-item>
+      <!-- Champ: Nombre maximum de participants -->
+      <ion-item [class.ion-invalid]="isFieldInvalid('nombreMaxParticipants')">
+        <ion-label position="floating">
+          Nombre maximum de participants <span class="required">*</span>
+        </ion-label>
+        <ion-input
+          formControlName="nombreMaxParticipants"
+          type="number"
+          min="1"
+          placeholder="Ex: 50"
+        ></ion-input>
+      </ion-item>
+      <!-- Message d'erreur pour le nombre de participants -->
+      <div class="error-message" *ngIf="isFieldInvalid('nombreMaxParticipants')">
+        {{ getErrorMessage('nombreMaxParticipants') }}
+      </div>
 
-    <ion-item>
-      <ion-label position="floating">Image URL (optionnel)</ion-label>
-      <ion-input formControlName="imageUrl"></ion-input>
-    </ion-item>
+      <!-- Champ: URL de l'image -->
+      <ion-item [class.ion-invalid]="isFieldInvalid('imageUrl')">
+        <ion-label position="floating">
+          URL de l'image <span class="required">*</span>
+        </ion-label>
+        <ion-input
+          formControlName="imageUrl"
+          type="url"
+          placeholder="https://example.com/image.jpg"
+        ></ion-input>
+      </ion-item>
+      <!-- Message d'erreur pour l'URL -->
+      <div class="error-message" *ngIf="isFieldInvalid('imageUrl')">
+        {{ getErrorMessage('imageUrl') }}
+      </div>
+      
+      <!-- Boutons d'action -->
+      <div class="action-buttons">
+        <!-- Bouton Annuler -->
+        <ion-button 
+          expand="block" 
+          fill="outline" 
+          color="medium"
+          (click)="cancel()"
+          type="button"
+        >
+          Annuler
+        </ion-button>
 
-    <ion-button expand="full" type="submit" [disabled]="!eventForm.valid">
-      Créer l'Événement
-    </ion-button>
+        <!-- Bouton Créer -->
+        <ion-button 
+          expand="block" 
+          color="primary"
+          type="submit"
+          [disabled]="eventForm.invalid"
+        >
+          Créer l'événement
+        </ion-button>
+      </div>
 
-  </form>
+    </form>
+  </div>
 </ion-content>

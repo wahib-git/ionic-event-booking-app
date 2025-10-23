@@ -1,13 +1,130 @@
+<!--
+  Template de la page d'accueil participant
+  Affiche tous les événements avec possibilité de participation
+-->
+
+<!-- Header avec titre et bouton de déconnexion -->
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>participant-home</ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>
+      <ion-icon name="person-circle" slot="start"></ion-icon>
+      Événements Communautaires
+    </ion-title>
+    
+    <!-- Bouton de déconnexion -->
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
+<!-- Contenu principal -->
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">participant-home</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <!-- État de chargement -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Chargement des événements...</p>
+  </div>
+
+  <!-- État vide: aucun événement disponible -->
+  <div *ngIf="!isLoading && events.length === 0" class="empty-state">
+    <ion-icon name="calendar" class="empty-icon"></ion-icon>
+    <h2>Aucun événement disponible</h2>
+    <p>Revenez plus tard pour découvrir de nouveaux événements</p>
+  </div>
+
+  <!-- Liste des événements -->
+  <div *ngIf="!isLoading && events.length > 0" class="events-container">
+    <!-- Header de section -->
+    <div class="section-header">
+      <h2>Événements disponibles ({{ events.length }})</h2>
+    </div>
+
+    <!-- Boucle sur chaque événement -->
+    <ion-card *ngFor="let event of events" class="event-card">
+      <!-- Image de l'événement -->
+      <img 
+        [src]="event.imageUrl" 
+        [alt]="event.nom"
+        class="event-image"
+      />
+
+      <!-- Badge de statut en haut à droite de l'image -->
+      <div class="status-badges">
+        <!-- Badge "Inscrit" si l'utilisateur participe -->
+        <ion-chip *ngIf="isUserJoined(event.id)" color="success" class="status-chip">
+          <ion-icon name="checkmark-circle"></ion-icon>
+          <ion-label>Inscrit</ion-label>
+        </ion-chip>
+        
+        <!-- Badge "Complet" si plus de places -->
+        <ion-chip *ngIf="!hasAvailableSpots(event) && !isUserJoined(event.id)" color="danger" class="status-chip">
+          <ion-icon name="close-circle"></ion-icon>
+          <ion-label>Complet</ion-label>
+        </ion-chip>
+      </div>
+
+      <!-- Header de la card -->
+      <ion-card-header>
+        <ion-card-title>{{ event.nom }}</ion-card-title>
+        <ion-card-subtitle>
+          <!-- Date de l'événement -->
+          <ion-icon name="calendar"></ion-icon>
+          {{ formatDate(event.dateDebut) }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <!-- Contenu de la card -->
+      <ion-card-content>
+        <!-- Description de l'événement -->
+        <p class="event-description">{{ event.description }}</p>
+
+        <!-- Informations de l'événement -->
+        <div class="event-info">
+          <!-- Lieu -->
+          <div class="info-item">
+            <ion-icon name="location"></ion-icon>
+            <span>{{ event.lieu }}</span>
+          </div>
+
+          <!-- Places disponibles -->
+          <div class="info-item">
+            <ion-icon name="people"></ion-icon>
+            <span>
+              {{ event.participantsCount }} / {{ event.nombreMaxParticipants }} participants
+            </span>
+            <!-- Badge visuel pour les places restantes -->
+            <ion-badge 
+              [color]="hasAvailableSpots(event) ? 'success' : 'danger'"
+              class="spots-badge">
+              {{ event.nombreMaxParticipants - event.participantsCount }} 
+              {{ (event.nombreMaxParticipants - event.participantsCount) === 1 ? 'place restante' : 'places restantes' }}
+            </ion-badge>
+          </div>
+        </div>
+
+        <!-- Bouton d'action (S'inscrire / Se désinscrire) -->
+        <ion-button
+          expand="block"
+          [color]="isUserJoined(event.id) ? 'danger' : 'primary'"
+          [disabled]="!isUserJoined(event.id) && !hasAvailableSpots(event)"
+          (click)="toggleParticipation(event)"
+          class="action-button">
+          
+          <!-- Icône selon l'état -->
+          <ion-icon 
+            [name]="isUserJoined(event.id) ? 'close-circle' : 'add-circle'" 
+            slot="start">
+          </ion-icon>
+          
+          <!-- Texte du bouton selon l'état -->
+          <span *ngIf="isUserJoined(event.id)">Se désinscrire</span>
+          <span *ngIf="!isUserJoined(event.id) && hasAvailableSpots(event)">S'inscrire</span>
+          <span *ngIf="!isUserJoined(event.id) && !hasAvailableSpots(event)">Événement complet</span>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

@@ -1,101 +1,114 @@
-<ion-header>
+<!-- 
+  Template de la page d'accueil administrateur
+  Affiche la liste des événements avec options de gestion
+-->
+
+<!-- Header avec titre et bouton de déconnexion -->
+<ion-header [translucent]="true">
   <ion-toolbar color="primary">
-    <ion-title>Tableau de bord Admin</ion-title>
+    <ion-title>
+      <ion-icon name="person-circle" slot="start"></ion-icon>
+      Tableau de bord Admin
+    </ion-title>
+    
+    <!-- Bouton de déconnexion dans le header -->
     <ion-buttons slot="end">
-      <ion-button (click)="refreshDashboard()" fill="clear">
-        <ion-icon name="refresh-outline"></ion-icon>
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <!-- En-tête utilisateur -->
-  <ion-card class="welcome-card">
-    <ion-card-content>
-      <div class="welcome-header">
-        <ion-icon name="person-circle-outline" class="avatar-icon"></ion-icon>
-        <div class="welcome-text">
-          <h1>Bienvenue, {{ userName }}!</h1>
-          <p>Gérez vos événements et vos participants</p>
-        </div>
-      </div>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Statistiques -->
-  <div class="stats-container">
-    <!-- Total événements -->
-    <ion-card class="stat-card">
-      <ion-card-content>
-        <div class="stat-content">
-          <ion-icon name="calendar-outline" class="stat-icon primary"></ion-icon>
-          <div class="stat-info">
-            <p class="stat-label">Total Événements</p>
-            <p class="stat-value">{{ stats.totalEvents }}</p>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Événements actifs -->
-    <ion-card class="stat-card">
-      <ion-card-content>
-        <div class="stat-content">
-          <ion-icon name="checkmark-circle-outline" class="stat-icon success"></ion-icon>
-          <div class="stat-info">
-            <p class="stat-label">Actifs</p>
-            <p class="stat-value">{{ stats.activeEvents }}</p>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Participants -->
-    <ion-card class="stat-card">
-      <ion-card-content>
-        <div class="stat-content">
-          <ion-icon name="people-outline" class="stat-icon info"></ion-icon>
-          <div class="stat-info">
-            <p class="stat-label">Participants</p>
-            <p class="stat-value">{{ stats.totalParticipants }}</p>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-
-    <!-- À venir -->
-    <ion-card class="stat-card">
-      <ion-card-content>
-        <div class="stat-content">
-          <ion-icon name="arrow-forward-outline" class="stat-icon warning"></ion-icon>
-          <div class="stat-info">
-            <p class="stat-label">À venir</p>
-            <p class="stat-value">{{ stats.upcomingEvents }}</p>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
+<!-- Contenu principal -->
+<ion-content [fullscreen]="true">
+  <!-- Message de chargement pendant la récupération des données -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Chargement des événements...</p>
   </div>
 
-  <!-- Boutons d'action -->
-  <div class="action-buttons">
-    <ion-button expand="block" color="success" (click)="goToCreateEvent()" class="ion-margin-bottom">
-      <ion-icon name="add-outline" slot="start"></ion-icon>
+  <!-- Affichage quand aucun événement n'existe -->
+  <div *ngIf="!isLoading && events.length === 0" class="empty-state">
+    <ion-icon name="calendar" class="empty-icon"></ion-icon>
+    <h2>Aucun événement</h2>
+    <p>Commencez par créer votre premier événement communautaire</p>
+    <ion-button (click)="goToCreateEvent()" expand="block">
+      <ion-icon name="add" slot="start"></ion-icon>
       Créer un événement
     </ion-button>
-
-    <ion-button expand="block" color="primary" (click)="goToManageEvents()" class="ion-margin-bottom">
-      <ion-icon name="list-outline" slot="start"></ion-icon>
-      Gérer les événements
-    </ion-button>
-
-    <ion-button expand="block" fill="outline" color="danger" (click)="logout()">
-      <ion-icon name="log-out-outline" slot="start"></ion-icon>
-      Déconnexion
-    </ion-button>
   </div>
 
-  <!-- Chargement -->
-  <ion-spinner *ngIf="isLoading" name="crescent" color="primary" class="spinner"></ion-spinner>
+  <!-- Liste des événements sous forme de cards -->
+  <div *ngIf="!isLoading && events.length > 0" class="events-container">
+    <!-- Header de section -->
+    <div class="section-header">
+      <h2>Mes événements ({{ events.length }})</h2>
+    </div>
+
+    <!-- Boucle sur chaque événement -->
+    <ion-card *ngFor="let event of events" class="event-card">
+      <!-- Image de l'événement -->
+      <img 
+        [src]="event.imageUrl" 
+        [alt]="event.nom"
+        class="event-image"
+      />
+
+      <!-- Header de la card avec titre et sous-titre -->
+      <ion-card-header>
+        <ion-card-title>{{ event.nom }}</ion-card-title>
+        <ion-card-subtitle>
+          <!-- Icône et date -->
+          <ion-icon name="calendar"></ion-icon>
+          {{ formatDate(event.dateDebut) }}
+        </ion-card-subtitle>
+      </ion-card-header>
+
+      <!-- Contenu de la card -->
+      <ion-card-content>
+        <!-- Description de l'événement -->
+        <p class="event-description">{{ event.description }}</p>
+
+        <!-- Informations supplémentaires -->
+        <div class="event-info">
+          <!-- Lieu -->
+          <div class="info-item">
+            <ion-icon name="location"></ion-icon>
+            <span>{{ event.lieu }}</span>
+          </div>
+
+          <!-- Nombre de participants -->
+          <div class="info-item">
+            <ion-icon name="people"></ion-icon>
+            <span>
+              {{ event.participantsCount }} / {{ event.nombreMaxParticipants }} participants
+            </span>
+          </div>
+        </div>
+
+        <!-- Bouton de suppression -->
+        <ion-button 
+          expand="block" 
+          color="danger" 
+          (click)="deleteEvent(event)"
+          class="delete-button">
+          <ion-icon name="trash" slot="start"></ion-icon>
+          Supprimer l'événement
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Bouton flottant pour créer un nouvel événement -->
+  <!-- Visible uniquement quand il y a déjà des événements -->
+  <ion-fab 
+    *ngIf="!isLoading && events.length > 0" 
+    slot="fixed" 
+    vertical="bottom" 
+    horizontal="end">
+    <ion-fab-button color="secondary" (click)="goToCreateEvent()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

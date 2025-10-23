@@ -4,168 +4,172 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  UserCredential,
-  onAuthStateChanged,
-  User
+  User,
 } from '@angular/fire/auth';
-import { Firestore, doc, setDoc, getDoc } from '@angular/fire/firestore';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
+import { authState } from '@angular/fire/auth';
+import { UserService } from './user.service';
 
+/**
+ * Service d'authentification Firebase
+ * Gère l'inscription, la connexion et la déconnexion des utilisateurs
+ * Intégré avec UserService pour créer automatiquement les profils
+ */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$: Observable<User | null> = this.currentUserSubject.asObservable();
+  // Observable de l'état d'authentification
+  user$: Observable<User | null>;
 
-  private currentRoleSubject = new BehaviorSubject<string | null>(null);
-  public currentRole$: Observable<string | null> = this.currentRoleSubject.asObservable();
-
-  private isLoadingSubject = new BehaviorSubject<boolean>(false);
-  public isLoading$: Observable<boolean> = this.isLoadingSubject.asObservable();
-
-  constructor(private auth: Auth, private firestore: Firestore) {
-    // Pas de setPersistence() - cela cause des erreurs
-    this.initializeAuthState();
+  /**
+   * Constructeur du service
+   * @param auth Instance Firebase Auth
+   * @param userService Service utilisateur pour créer les profils
+   */
+  constructor(private auth: Auth, private userService: UserService) {
+    // Initialisation de l'observable user$
+    this.user$ = authState(this.auth);
   }
 
-  // Initialiser l'état d'authentification
-  private initializeAuthState() {
-    console.log(' Initialisation de l\'état d\'authentification');
-    onAuthStateChanged(this.auth, async (user: User | null) => {
-      console.log('👤 Utilisateur changé:', user?.uid || 'null');
-      this.currentUserSubject.next(user);
-      
-      if (user) {
-        try {
-          const role = await this.getUserRole(user.uid);
-          console.log(' Rôle chargé:', role);
-          this.currentRoleSubject.next(role);
-        } catch (error: any) {
-          console.error(' Erreur rôle:', error.message);
-          this.currentRoleSubject.next(null);
-        }
-      } else {
-        this.currentRoleSubject.next(null);
-      }
-    });
-  }
-
-  // Inscription
+  /**
+   * Inscrit un nouvel utilisateur avec email et mot de passe
+   * Crée automatiquement le profil utilisateur dans Firestore
+   *
+   * @param email Adresse email de l'utilisateur
+   * @param password Mot de passe
+   * @param role Rôle de l'utilisateur ('admin' ou 'participant')
+   * @returns Promise<UserCredential> Informations de l'utilisateur créé
+   */
   async register(
     email: string,
     password: string,
-    role: 'admin' | 'participant',
-    name?: string
-  ): Promise<UserCredential> {
-    this.isLoadingSubject.next(true);
+    role: 'admin' | 'participant'
+  ): Promise<any> {
     try {
-      console.log(' Inscription:', email);
-      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
-
-      await setDoc(doc(this.firestore, `users/${userCredential.user.uid}`), {
-        uid: userCredential.user.uid,
+      // Étape 1: Création du compte Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(
+        this.auth,
         email,
-        role,
-        name: name || email.split('@')[0],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        isActive: true
-      });
+        password
+      );
 
-      console.log(' Utilisateur créé');
-      this.isLoadingSubject.next(false);
+      console.log('Compte Firebase Auth créé:', userCredential.user.uid);
+
+      // Étape 2: Création du profil utilisateur dans Firestore
+      await this.userService.createUserProfile(
+        userCredential.user.uid,
+        email,
+        role
+      );
+
+      console.log('Profil utilisateur créé dans Firestore');
+
       return userCredential;
-
     } catch (error: any) {
-      console.error('Erreur inscription:', error.message);
-      this.isLoadingSubject.next(false);
-      throw error;
+      // Gestion des erreurs d'inscription
+      console.error("Erreur lors de l'inscription:", error);
+
+      // Transformation des erreurs Firebase en messages lisibles
+      let errorMessage = "Erreur lors de l'inscription";
+
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          errorMessage = 'Cette adresse email est déjà utilisée';
+          break;
+        case 'auth/weak-password':
+          errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Adresse email invalide';
+          break;
+      }
+
+      throw new Error(errorMessage);
     }
   }
 
-  // Connexion
-  async login(email: string, password: string): Promise<UserCredential> {
-    this.isLoadingSubject.next(true);
+  /**
+   * Connecte un utilisateur avec email et mot de passe
+   *
+   * @param email Adresse email
+   * @param password Mot de passe
+   * @returns Promise<UserCredential> Informations de l'utilisateur connecté
+   */
+  async login(email: string, password: string): Promise<any> {
     try {
-      console.log(' Connexion:', email);
-      const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-      console.log(' Connecté');
-      this.isLoadingSubject.next(false);
+      // Tentative de connexion Firebase Auth
+      const userCredential = await signInWithEmailAndPassword(
+        this.auth,
+        email,
+        password
+      );
+
+      console.log('Utilisateur connecté:', userCredential.user.uid);
+
       return userCredential;
-
     } catch (error: any) {
-      console.error(' Erreur connexion:', error.message);
-      this.isLoadingSubject.next(false);
-      throw error;
-    }
-  }
+      // Gestion des erreurs de connexion
+      console.error('Erreur lors de la connexion:', error);
 
-  // Récupérer le rôle
-  async getUserRole(uid: string): Promise<string | null> {
-    try {
-      if (!uid) return null;
+      let errorMessage = 'Erreur lors de la connexion';
 
-      console.log('Récupération du rôle:', uid);
-      const userDoc = await getDoc(doc(this.firestore, `users/${uid}`));
-
-      if (userDoc.exists()) {
-        const role = userDoc.data()['role'];
-        console.log('Rôle trouvé:', role);
-        return role || null;
+      switch (error.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          errorMessage = 'Email ou mot de passe incorrect';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Adresse email invalide';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'Ce compte a été désactivé';
+          break;
       }
-      return null;
 
-    } catch (error: any) {
-      console.error(' Erreur getUserRole:', error.message);
-      throw error;
+      throw new Error(errorMessage);
     }
   }
 
-  // Récupérer les données utilisateur
-  async getUserData(uid: string): Promise<any> {
-    try {
-      if (!uid) return null;
-
-      const userDoc = await getDoc(doc(this.firestore, `users/${uid}`));
-      if (userDoc.exists()) {
-        return userDoc.data();
-      }
-      return null;
-
-    } catch (error: any) {
-      console.error(' Erreur getUserData:', error.message);
-      throw error;
-    }
-  }
-
-  // Déconnexion
+  /**
+   * Déconnecte l'utilisateur actuel
+   *
+   * @returns Promise qui se résout après la déconnexion
+   */
   async logout(): Promise<void> {
     try {
-      console.log(' Déconnexion');
       await signOut(this.auth);
-      this.currentUserSubject.next(null);
-      this.currentRoleSubject.next(null);
-      console.log('Déconnecté');
-
-    } catch (error: any) {
-      console.error(' Erreur logout:', error.message);
-      throw error;
+      console.log('Utilisateur déconnecté');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+      throw new Error('Erreur lors de la déconnexion');
     }
   }
 
-  // Vérifier si authentifié
-  isAuthenticated(): boolean {
-    return !!this.currentUserSubject.value;
-  }
-
-  // Obtenir l'utilisateur actuel
+  /**
+   * Récupère l'utilisateur actuellement connecté
+   *
+   * @returns User | null Utilisateur actuel ou null si non connecté
+   */
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.auth.currentUser;
   }
 
-  // Obtenir le rôle actuel
-  getCurrentRole(): string | null {
-    return this.currentRoleSubject.value;
+  /**
+   * Vérifie si un utilisateur est connecté
+   *
+   * @returns boolean true si connecté, false sinon
+   */
+  isAuthenticated(): boolean {
+    return this.auth.currentUser !== null;
+  }
+
+  /**
+   * Retourne le rôle de l'utilisateur ('admin' | 'participant') ou null si non trouvé
+   */
+  async getUserRole(uid: string): Promise<'admin' | 'participant' | null> {
+    if (!uid) return null;
+    const profile = await firstValueFrom(this.userService.getUserProfile(uid));
+    return profile ? profile.role : null;
   }
 }
